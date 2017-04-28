@@ -1,0 +1,102 @@
+byte speed = 150; // vitesse max de nos roues
+
+// broches pour le pont en H
+int AIA = 3; // pin PWM
+int AIB = 4; // pin PWM
+int BIA = 5; // pin PWM
+int BIB = 6; // pin PWM
+
+// broche à laquelle est rattachée la broche SIG de l'ultrasons
+int pingPin = 7 ; // pin digital
+
+// broche à laquelle est rattachée la grande pate de la led
+int led = 9 ; // pin PWM
+
+void setup() {
+  // définir les Sorties
+  pinMode(AIA, OUTPUT);
+  pinMode(AIB, OUTPUT);
+  pinMode(BIA, OUTPUT);
+  pinMode(BIB, OUTPUT);
+  pinMode(led, OUTPUT);
+
+  // initialiser la liaison serie
+  Serial.begin(9600);   
+}
+
+void loop() {
+  long distance; // établir les variables pour la distance et la durée.
+  distance = ping();
+  
+  if (distance < 30){
+    digitalWrite(led, HIGH);
+    reculer();
+    delay (100);
+    stopper();
+    delay(100);
+    tourneD();
+    delay (500);
+    stopper();
+  }
+  else {
+    avancer();
+    digitalWrite(led, 0); // Éteindre si la distance est supérieure à 40cm.
+  }
+  
+  delay(100);
+}
+
+void avancer() {
+  analogWrite(AIA, speed);
+  analogWrite(AIB, 0);
+  analogWrite(BIA, speed);
+  analogWrite(BIB, 0);
+}
+
+void stopper() {
+  analogWrite(AIA, 0);
+  analogWrite(AIB, 0);
+  analogWrite(BIA, 0);
+  analogWrite(BIB, 0);
+}
+
+void reculer() {
+  analogWrite(AIA, 0);
+  analogWrite(AIB, speed);
+  analogWrite(BIA, 0);
+  analogWrite(BIB, speed);
+}
+
+void tourneD() {
+  analogWrite(AIA, 0);
+  analogWrite(AIB, speed);
+  analogWrite(BIA, speed);
+  analogWrite(BIB, 0);
+}
+
+void tourneG() {
+  analogWrite(AIA, speed);
+  analogWrite(AIB, 0);
+  analogWrite(BIA, 0);
+  analogWrite(BIB, speed);
+}
+
+long ping(){
+  //-------------Get-Distance-----------------------------//
+  long duree, distance;  // établir les variables pour la distance et la durée.
+
+  // Le PING est déclenché par une impulsion HIGH pendant 2ms ou plus. Envoyer une courte impulsion LOW auparavant pour avoir un HIGH bien franc.
+  pinMode(pingPin, OUTPUT); // définir le pingPin comme sortie
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
+
+  // La meme broche est utilisée pour lire le signal du PING.
+  pinMode(pingPin, INPUT); // définir le pingPin comme entrée
+  duree = pulseIn(pingPin, HIGH); // récupérer la valeur du ping en microsecondes
+  distance = duree/29/2;    // La vitesse du son est de 340 m/s ou 29 microsecondes par centimètre. Comme notre ping fait un aller-retour entre le capteur et l'objet, pour trouver la distance à l'objet, nous prenons la moitié de la distance parcourue par le ping.
+  return distance;
+  //-------------End-Get-Distance------------------------//
+}
