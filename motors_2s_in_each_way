@@ -1,0 +1,33 @@
+const int AIA = 0;
+const int AIB = 1;
+const int BIA = 2;
+const int BIB = 3;
+byte speed = 255;
+
+void setup() {
+  pinMode(AIA, OUTPUT);
+  pinMode(AIB, OUTPUT);
+  pinMode(BIA, OUTPUT);
+  pinMode(BIB, OUTPUT);
+}
+
+void loop() {
+  forward(); 
+  delay(2000);
+  backward();
+  delay(2000);
+}
+
+void reculer() {
+  analogWrite(AIA, 0);
+  analogWrite(AIB, speed);
+  analogWrite(BIA, 0);
+  analogWrite(BIB, speed);
+}
+
+void avancer() {
+  analogWrite(AIA, speed);
+  analogWrite(AIB, 0);
+  analogWrite(BIA, speed);
+  analogWrite(BIB, 0);
+}
