@@ -1,0 +1,48 @@
+const int led = 7 ;     // la broche à laquelle est rattachée la grande pate de la led
+const int pingPin = 9 ; // la broche à laquelle est rattachée la broche SIG de l'ultrasons
+int luminosite ;        // luminosité de la led
+
+void setup() {
+  Serial.begin(9600);   // initialiser la liaison serie matérielle
+  pinMode(led, OUTPUT); // initialiser la led comme sortie
+}
+
+void loop(){
+  long distance_obstacle;
+  distance_obstacle = ping(); // ping est une fonction.
+
+  //-------------Fading-LED------------------------------//
+  // Si la distance est inférieure à 40cm, on calcule la luminosité proportionnelle et on allume la led avec cette valeur.
+  // Sinon, on éteint la led.
+  
+  if (distance_obstacle < 0){
+    luminosite = map(distance_obstacle , 0, 40, 0, 254); // calculer la luminosité proportionnellement à la distance
+    analogWrite(led, luminosite); 
+  }
+  else {
+    analogWrite(led, 0);  // Éteindre si la distance est supérieure à 40cm.
+  }
+  //-------------End-Fading-LED-----------------------------//
+  
+  delay(100);
+}
+
+long ping(){
+  //-------------Get-Distance-----------------------------//
+  long duree, distance;  // établir les variables pour la distance et la durée.
+
+  // Le PING est déclenché par une impulsion HIGH pendant 2ms ou plus. Envoyer une courte impulsion LOW auparavant pour avoir un HIGH bien franc.
+  pinMode(pingPin, OUTPUT); // définir le pingPin comme sortie
+  digitalWrite(pingPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(pingPin, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(pingPin, LOW);
+
+  // La meme broche est utilisée pour lire le signal du PING.
+  pinMode(pingPin, INPUT); // définir le pingPin comme entrée
+  duree = pulseIn(pingPin, HIGH); // récupérer la valeur du ping en microsecondes
+  distance = duree/29/2;    // La vitesse du son est de 340 m/s ou 29 microsecondes par centimètre. Comme notre ping fait un aller-retour entre le capteur et l'objet, pour trouver la distance à l'objet, nous prenons la moitié de la distance parcourue par le ping.
+  return distance;
+  //-------------End-Get-Distance------------------------//
+}
